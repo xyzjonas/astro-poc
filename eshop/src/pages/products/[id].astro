@@ -1,0 +1,74 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import type { Product } from '../../types';
+
+export async function getStaticPaths() {
+
+    const res = await fetch('https://dummyjson.com/products')
+    const { products } = await res.json();
+
+    return products.map((pr: Product) => {
+        return { params: { id: pr.id } }
+    })
+};
+
+const { id } = Astro.params;
+const res = await fetch(`https://dummyjson.com/products/${id}`)
+const product: Product = await res.json();
+console.info(product)
+
+---
+<Layout title={product.title}>
+<main>
+    <h1>{product.title}</h1>
+    <p class="tag">{product.category}</p>
+    <p>{product.description}</p>
+    <small>{product.stock} in store</small>
+    <h3>Price: {product.price} <small class="striked">from {product.price + product.price * product.discountPercentage / 100} $</small></h3>
+    <section class="gallery">
+    {product.images.map(imgSrc => (
+        <img src={imgSrc}/>
+    ))}
+    </section>
+</main>
+</Layout>
+
+<style>
+main {
+    margin: auto;
+    padding: 1rem;
+    width: 800px;
+    max-width: calc(100% - 2rem);
+    color: white;
+    font-size: 20px;
+    line-height: 1.6;
+}
+
+.gallery {
+    display: flex;
+    flex-direction: row;
+    gap: 16px;
+    overflow-x: scroll;
+    padding: 16px 0;
+    height: 20rem;
+}
+
+.tag {
+    background-color: white;
+    width: fit-content;
+    border-radius: 16px;
+    color: #333;
+    padding: 8px 16px;
+    font-size: smaller;
+    font-weight: 600;
+}
+
+.striked {
+    text-decoration: line-through;
+    margin-left: 8px;
+}
+
+img {
+    border-radius: 16px;
+}
+</style>
